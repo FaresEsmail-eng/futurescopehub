@@ -1,0 +1,21 @@
+# FutureScopeHub - Python Dependencies
+# =====================================
+# These are required for the automation scripts
+
+# Google Gemini SDK (2026 version with grounding support)
+google-genai>=1.0.0
+
+# RSS Feed Parsing
+feedparser>=6.0.0
+
+# URL/Slug utilities
+python-slugify>=8.0.0
+
+# Image handling (for Imagen integration)
+Pillow>=10.0.0
+
+# HTTP requests (backup for custom API calls)
+httpx>=0.27.0
+
+# Date/time utilities
+python-dateutil>=2.8.0

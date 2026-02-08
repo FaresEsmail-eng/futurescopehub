@@ -1,0 +1,126 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  pubDate: Date;
+  heroImage?: string;
+  category: 'tech' | 'entertainment' | 'news';
+  slug: string;
+  tags?: string[];
+  readingTime?: string;
+  featured?: boolean;
+  tldr?: string;
+}
+
+const { title, description, pubDate, heroImage, category, slug, tags, readingTime, featured, tldr } = Astro.props;
+
+const categoryColors = {
+  tech: { bg: 'tag-tech', text: 'Tech', icon: '⚡' },
+  entertainment: { bg: 'tag-entertainment', text: 'Entertainment', icon: '🎬' },
+  news: { bg: 'tag-news', text: 'News', icon: '📰' }
+};
+
+const cat = categoryColors[category];
+
+const formattedDate = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric'
+}).format(pubDate);
+---
+
+<article class:list={[
+  "group relative overflow-hidden rounded-2xl bg-[var(--color-deep-space)] border border-[var(--color-nebula-gray)]/30",
+  "card-hover neon-border",
+  featured && "md:col-span-2 md:row-span-2"
+]}>
+  <a href={`/blog/${slug}`} class="block">
+    <!-- Image Container -->
+    <div class:list={[
+      "relative overflow-hidden",
+      featured ? "aspect-[16/9]" : "aspect-[16/10]"
+    ]}>
+      {heroImage ? (
+        <img 
+          src={heroImage} 
+          alt={title}
+          class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+        />
+      ) : (
+        <div class="w-full h-full bg-gradient-to-br from-[var(--color-galaxy-dark)] to-[var(--color-nebula-gray)] flex items-center justify-center">
+          <span class="text-6xl opacity-30">{cat.icon}</span>
+        </div>
+      )}
+      
+      <!-- Gradient Overlay -->
+      <div class="absolute inset-0 bg-gradient-to-t from-[var(--color-deep-space)] via-transparent to-transparent"></div>
+      
+      <!-- Category Badge -->
+      <div class="absolute top-4 left-4">
+        <span class:list={[
+          "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-white shadow-lg",
+          cat.bg
+        ]}>
+          <span>{cat.icon}</span>
+          <span>{cat.text}</span>
+        </span>
+      </div>
+      
+      <!-- Featured Badge -->
+      {featured && (
+        <div class="absolute top-4 right-4">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--color-neon-cyan)] text-black">
+            ★ Featured
+          </span>
+        </div>
+      )}
+    </div>
+    
+    <!-- Content -->
+    <div class="p-5">
+      <!-- Meta -->
+      <div class="flex items-center gap-3 text-xs text-[var(--color-text-muted)] mb-3">
+        <time datetime={pubDate.toISOString()}>{formattedDate}</time>
+        {readingTime && (
+          <>
+            <span>•</span>
+            <span>{readingTime}</span>
+          </>
+        )}
+      </div>
+      
+      <!-- Title -->
+      <h3 class:list={[
+        "font-bold text-white group-hover:text-[var(--color-neon-cyan)] transition-colors line-clamp-2 mb-2",
+        featured ? "text-2xl" : "text-lg"
+      ]}>
+        {title}
+      </h3>
+      
+      <!-- TLDR or Description -->
+      <p class="text-sm text-[var(--color-text-secondary)] line-clamp-2 mb-4">
+        {tldr || description}
+      </p>
+      
+      <!-- Tags -->
+      {tags && tags.length > 0 && (
+        <div class="flex flex-wrap gap-2">
+          {tags.slice(0, 3).map(tag => (
+            <span class="px-2 py-1 text-xs rounded-md bg-[var(--color-galaxy-dark)] text-[var(--color-text-muted)]">
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
+      
+      <!-- Read More Arrow -->
+      <div class="mt-4 flex items-center gap-2 text-sm font-medium text-[var(--color-neon-cyan)] opacity-0 group-hover:opacity-100 transition-opacity">
+        <span>Read More</span>
+        <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        </svg>
+      </div>
+    </div>
+  </a>
+</article>

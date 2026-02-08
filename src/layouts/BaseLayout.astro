@@ -1,0 +1,86 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+}
+
+const { 
+  title, 
+  description = "FutureScopeHub - Your daily dose of tech, entertainment, and breaking news. Fresh perspectives powered by AI.", 
+  image = "/og-default.png" 
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="sitemap" href="/sitemap-index.xml" />
+  <link rel="alternate" type="application/rss+xml" title="FutureScopeHub RSS" href="/rss.xml" />
+  
+  <!-- SEO Meta -->
+  <title>{title} | FutureScopeHub</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonicalURL} />
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={canonicalURL} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content={new URL(image, Astro.site)} />
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={new URL(image, Astro.site)} />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  
+  <!-- Global CSS -->
+  <style is:global>
+    @import "../styles/global.css";
+  </style>
+</head>
+<body class="bg-grid min-h-screen">
+  <slot />
+  
+  <!-- Smooth scroll reveal script -->
+  <script>
+    // Reading progress bar
+    if (document.querySelector('.reading-progress')) {
+      window.addEventListener('scroll', () => {
+        const article = document.querySelector('article');
+        if (!article) return;
+        
+        const scrollTop = window.scrollY;
+        const docHeight = article.offsetHeight - window.innerHeight;
+        const progress = Math.min((scrollTop / docHeight) * 100, 100);
+        
+        const bar = document.querySelector('.reading-progress') as HTMLElement;
+        if (bar) bar.style.width = `${progress}%`;
+      });
+    }
+    
+    // Fade in on scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-fade-in');
+        }
+      });
+    }, { threshold: 0.1 });
+    
+    document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Header from '@components/Header.astro';
+import Footer from '@components/Footer.astro';
+import PostCard from '@components/PostCard.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  return [
+    { params: { category: 'tech' } },
+    { params: { category: 'entertainment' } },
+    { params: { category: 'news' } }
+  ];
+}
+
+const { category } = Astro.params;
+
+const categoryMeta = {
+  tech: {
+    title: 'Tech',
+    icon: '⚡',
+    description: 'Latest in technology, AI, gadgets, and digital innovation.',
+    gradient: 'from-[var(--color-electric-blue)] to-[var(--color-neon-cyan)]'
+  },
+  entertainment: {
+    title: 'Entertainment',
+    icon: '🎬',
+    description: 'Movies, music, gaming, and pop culture highlights.',
+    gradient: 'from-[var(--color-neon-purple)] to-[var(--color-neon-pink)]'
+  },
+  news: {
+    title: 'News',
+    icon: '📰',
+    description: 'Breaking stories and important updates from around the world.',
+    gradient: 'from-[var(--color-sunset-orange)] to-yellow-400'
+  }
+};
+
+const meta = categoryMeta[category as keyof typeof categoryMeta];
+
+const allPosts = await getCollection('blog');
+const categoryPosts = allPosts
+  .filter(post => post.data.category === category)
+  .sort((a, b) => new Date(b.data.pubDate).valueOf() - new Date(a.data.pubDate).valueOf());
+---
+
+<BaseLayout title={meta.title} description={meta.description}>
+  <Header />
+  
+  <main class="pt-24 pb-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Category Header -->
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-[var(--color-galaxy-dark)] mb-6 text-4xl">
+          {meta.icon}
+        </div>
+        <h1 class="text-4xl sm:text-5xl font-extrabold mb-4">
+          <span class={`bg-gradient-to-r ${meta.gradient} bg-clip-text text-transparent`}>
+            {meta.title}
+          </span>
+        </h1>
+        <p class="text-lg text-[var(--color-text-secondary)] max-w-2xl mx-auto">
+          {meta.description}
+        </p>
+      </div>
+      
+      <!-- Posts Grid -->
+      {categoryPosts.length === 0 ? (
+        <div class="text-center py-20 border border-dashed border-[var(--color-nebula-gray)] rounded-2xl">
+          <div class="text-6xl mb-4">{meta.icon}</div>
+          <h3 class="text-xl font-semibold text-white mb-2">No {meta.title} posts yet</h3>
+          <p class="text-[var(--color-text-muted)]">
+            Check back soon! Our AI is working on fresh content.
+          </p>
+        </div>
+      ) : (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {categoryPosts.map(post => (
+            <PostCard 
+              title={post.data.title}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              heroImage={post.data.heroImage}
+              category={post.data.category}
+              slug={post.slug}
+              tags={post.data.tags}
+              readingTime={post.data.readingTime}
+              featured={post.data.featured}
+              tldr={post.data.tldr}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  </main>
+  
+  <Footer />
+</BaseLayout>

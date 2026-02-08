@@ -1,0 +1,71 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Header from '@components/Header.astro';
+import Footer from '@components/Footer.astro';
+---
+
+<BaseLayout title="AI Disclaimer" description="Important information about AI-generated content on FutureScopeHub.">
+  <Header />
+  
+  <main class="pt-24 pb-16">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <article class="article-content">
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-white mb-8">
+          AI Content <span class="text-[var(--color-neon-pink)]">Disclaimer</span>
+        </h1>
+        
+        <div class="p-6 rounded-2xl bg-gradient-to-r from-[var(--color-galaxy-dark)] to-[var(--color-deep-space)] border border-[var(--color-neon-pink)]/30 mb-10">
+          <p class="text-lg text-[var(--color-text-secondary)] m-0">
+            <strong class="text-white">Transparency Notice:</strong> Content on FutureScopeHub is generated 
+            with the assistance of artificial intelligence and reviewed by humans before publication.
+          </p>
+        </div>
+        
+        <h2>What This Means</h2>
+        <p>
+          We use Google's Gemini 3 large language models to help synthesize, summarize, and write 
+          articles based on information gathered from public sources. While we employ advanced 
+          techniques like <strong>Search Grounding</strong> to verify facts, AI systems can still make errors.
+        </p>
+        
+        <h2>Our Safeguards</h2>
+        <ul>
+          <li><strong>Search Grounding:</strong> Every factual claim is cross-referenced against live Google Search results</li>
+          <li><strong>Source Attribution:</strong> We cite our sources whenever possible</li>
+          <li><strong>Human Review:</strong> All posts pass through human review before publication</li>
+          <li><strong>Continuous Improvement:</strong> We actively monitor for and correct errors</li>
+        </ul>
+        
+        <h2>Limitations</h2>
+        <p>
+          Despite our safeguards, you should be aware that:
+        </p>
+        <ul>
+          <li>AI may occasionally produce inaccurate or outdated information</li>
+          <li>Opinions expressed may not reflect the views of any individual or organization</li>
+          <li>This content should not be used as the sole source for important decisions</li>
+          <li>We recommend verifying critical information with primary sources</li>
+        </ul>
+        
+        <h2>Report Issues</h2>
+        <p>
+          Found something wrong? We want to know. Please report factual errors, outdated information, 
+          or any concerns to <a href="https://twitter.com/futurescopehub">@FutureScopeHub</a> on Twitter/X.
+        </p>
+        
+        <h2>Why AI?</h2>
+        <p>
+          We believe AI, used responsibly, can democratize access to quality information synthesis. 
+          Not everyone has time to read 50 articles a day. Our AI helps distill the essence while 
+          our humans ensure the soul.
+        </p>
+        
+        <p class="text-sm text-[var(--color-text-muted)] mt-8">
+          Last updated: February 2026
+        </p>
+      </article>
+    </div>
+  </main>
+  
+  <Footer />
+</BaseLayout>

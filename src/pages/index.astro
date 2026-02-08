@@ -1,0 +1,200 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Header from '@components/Header.astro';
+import Footer from '@components/Footer.astro';
+import HeroSection from '@components/HeroSection.astro';
+import PostCard from '@components/PostCard.astro';
+import { getCollection } from 'astro:content';
+
+// Get all blog posts sorted by date
+const allPosts = await getCollection('blog');
+const sortedPosts = allPosts.sort((a, b) => 
+  new Date(b.data.pubDate).valueOf() - new Date(a.data.pubDate).valueOf()
+);
+
+// Separate featured and regular posts
+const featuredPost = sortedPosts.find(post => post.data.featured);
+const regularPosts = sortedPosts.filter(post => !post.data.featured).slice(0, 8);
+
+// Group by category for sections
+const techPosts = sortedPosts.filter(p => p.data.category === 'tech').slice(0, 4);
+const entertainmentPosts = sortedPosts.filter(p => p.data.category === 'entertainment').slice(0, 4);
+const newsPosts = sortedPosts.filter(p => p.data.category === 'news').slice(0, 4);
+---
+
+<BaseLayout title="Home">
+  <Header />
+  
+  <main>
+    <HeroSection />
+    
+    <!-- Latest Posts Section -->
+    <section id="latest" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-2xl sm:text-3xl font-bold text-white">
+          Latest <span class="text-[var(--color-neon-cyan)]">Stories</span>
+        </h2>
+        <a href="/blog" class="text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-neon-cyan)] transition-colors">
+          View All →
+        </a>
+      </div>
+      
+      {sortedPosts.length === 0 ? (
+        <!-- Empty State -->
+        <div class="text-center py-20 border border-dashed border-[var(--color-nebula-gray)] rounded-2xl">
+          <div class="text-6xl mb-4">🚀</div>
+          <h3 class="text-xl font-semibold text-white mb-2">Content Coming Soon!</h3>
+          <p class="text-[var(--color-text-muted)] max-w-md mx-auto">
+            The AI is warming up. First posts will appear after the automation runs.
+            Check back soon!
+          </p>
+        </div>
+      ) : (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {featuredPost && (
+            <PostCard 
+              title={featuredPost.data.title}
+              description={featuredPost.data.description}
+              pubDate={featuredPost.data.pubDate}
+              heroImage={featuredPost.data.heroImage}
+              category={featuredPost.data.category}
+              slug={featuredPost.slug}
+              tags={featuredPost.data.tags}
+              readingTime={featuredPost.data.readingTime}
+              featured={true}
+              tldr={featuredPost.data.tldr}
+            />
+          )}
+          
+          {regularPosts.map(post => (
+            <PostCard 
+              title={post.data.title}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              heroImage={post.data.heroImage}
+              category={post.data.category}
+              slug={post.slug}
+              tags={post.data.tags}
+              readingTime={post.data.readingTime}
+              tldr={post.data.tldr}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+    
+    <!-- Category Sections -->
+    {techPosts.length > 0 && (
+      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-2xl sm:text-3xl font-bold">
+            <span class="text-white">⚡</span>
+            <span class="bg-gradient-to-r from-[var(--color-electric-blue)] to-[var(--color-neon-cyan)] bg-clip-text text-transparent">Tech</span>
+          </h2>
+          <a href="/category/tech" class="text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-neon-cyan)] transition-colors">
+            All Tech →
+          </a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {techPosts.map(post => (
+            <PostCard 
+              title={post.data.title}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              heroImage={post.data.heroImage}
+              category={post.data.category}
+              slug={post.slug}
+              tags={post.data.tags}
+              readingTime={post.data.readingTime}
+            />
+          ))}
+        </div>
+      </section>
+    )}
+    
+    {entertainmentPosts.length > 0 && (
+      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-2xl sm:text-3xl font-bold">
+            <span class="text-white">🎬</span>
+            <span class="bg-gradient-to-r from-[var(--color-neon-purple)] to-[var(--color-neon-pink)] bg-clip-text text-transparent">Entertainment</span>
+          </h2>
+          <a href="/category/entertainment" class="text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-neon-pink)] transition-colors">
+            All Entertainment →
+          </a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {entertainmentPosts.map(post => (
+            <PostCard 
+              title={post.data.title}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              heroImage={post.data.heroImage}
+              category={post.data.category}
+              slug={post.slug}
+              tags={post.data.tags}
+              readingTime={post.data.readingTime}
+            />
+          ))}
+        </div>
+      </section>
+    )}
+    
+    {newsPosts.length > 0 && (
+      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-2xl sm:text-3xl font-bold">
+            <span class="text-white">📰</span>
+            <span class="bg-gradient-to-r from-[var(--color-sunset-orange)] to-yellow-400 bg-clip-text text-transparent">News</span>
+          </h2>
+          <a href="/category/news" class="text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-sunset-orange)] transition-colors">
+            All News →
+          </a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {newsPosts.map(post => (
+            <PostCard 
+              title={post.data.title}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              heroImage={post.data.heroImage}
+              category={post.data.category}
+              slug={post.slug}
+              tags={post.data.tags}
+              readingTime={post.data.readingTime}
+            />
+          ))}
+        </div>
+      </section>
+    )}
+    
+    <!-- Newsletter CTA -->
+    <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[var(--color-galaxy-dark)] to-[var(--color-deep-space)] border border-[var(--color-nebula-gray)]/50 p-8 sm:p-12">
+        <!-- Background Decoration -->
+        <div class="absolute top-0 right-0 w-64 h-64 bg-[var(--color-neon-purple)] rounded-full blur-[100px] opacity-20"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 bg-[var(--color-electric-blue)] rounded-full blur-[100px] opacity-20"></div>
+        
+        <div class="relative z-10 text-center">
+          <h3 class="text-2xl sm:text-3xl font-bold text-white mb-4">
+            Never Miss a Story
+          </h3>
+          <p class="text-[var(--color-text-secondary)] mb-8 max-w-md mx-auto">
+            Subscribe to our RSS feed and get the latest insights delivered directly to your favorite reader.
+          </p>
+          <a 
+            href="/rss.xml" 
+            class="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-[var(--color-sunset-orange)] to-[var(--color-neon-pink)] text-white font-semibold hover:opacity-90 transition-opacity"
+          >
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z"/>
+            </svg>
+            <span>Get RSS Feed</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <Footer />
+</BaseLayout>

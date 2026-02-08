@@ -1,0 +1,94 @@
+---
+const navLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/category/tech', label: 'Tech' },
+  { href: '/category/entertainment', label: 'Entertainment' },
+  { href: '/category/news', label: 'News' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header class="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[var(--color-void-black)]/80 border-b border-[var(--color-nebula-gray)]/30">
+  <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-3 group">
+        <div class="relative w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-electric-blue)] via-[var(--color-neon-purple)] to-[var(--color-neon-pink)] p-[2px]">
+          <div class="w-full h-full rounded-xl bg-[var(--color-void-black)] flex items-center justify-center">
+            <span class="text-xl font-bold bg-gradient-to-r from-[var(--color-neon-cyan)] to-[var(--color-neon-purple)] bg-clip-text text-transparent">
+              FS
+            </span>
+          </div>
+        </div>
+        <span class="text-xl font-bold tracking-tight">
+          <span class="text-white">Future</span><span class="text-[var(--color-neon-cyan)]">Scope</span><span class="text-[var(--color-neon-purple)]">Hub</span>
+        </span>
+      </a>
+      
+      <!-- Desktop Nav -->
+      <div class="hidden md:flex items-center gap-1">
+        {navLinks.map(link => (
+          <a 
+            href={link.href}
+            class:list={[
+              "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+              currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href))
+                ? "bg-[var(--color-galaxy-dark)] text-[var(--color-neon-cyan)]"
+                : "text-[var(--color-text-secondary)] hover:text-white hover:bg-[var(--color-galaxy-dark)]/50"
+            ]}
+          >
+            {link.label}
+          </a>
+        ))}
+      </div>
+      
+      <!-- Live Badge + Search -->
+      <div class="flex items-center gap-4">
+        <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-galaxy-dark)] border border-[var(--color-nebula-gray)]">
+          <span class="w-2 h-2 rounded-full bg-[var(--color-neon-cyan)] pulse-live"></span>
+          <span class="text-xs font-medium text-[var(--color-text-secondary)]">AI-Powered</span>
+        </div>
+        
+        <!-- Mobile Menu Button -->
+        <button 
+          id="mobile-menu-btn"
+          class="md:hidden p-2 rounded-lg hover:bg-[var(--color-galaxy-dark)] transition-colors"
+          aria-label="Toggle menu"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden pb-4">
+      <div class="flex flex-col gap-1 pt-2">
+        {navLinks.map(link => (
+          <a 
+            href={link.href}
+            class:list={[
+              "px-4 py-3 rounded-lg text-sm font-medium transition-all",
+              currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href))
+                ? "bg-[var(--color-galaxy-dark)] text-[var(--color-neon-cyan)]"
+                : "text-[var(--color-text-secondary)] hover:text-white hover:bg-[var(--color-galaxy-dark)]/50"
+            ]}
+          >
+            {link.label}
+          </a>
+        ))}
+      </div>
+    </div>
+  </nav>
+</header>
+
+<script>
+  const btn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  
+  btn?.addEventListener('click', () => {
+    menu?.classList.toggle('hidden');
+  });
+</script>

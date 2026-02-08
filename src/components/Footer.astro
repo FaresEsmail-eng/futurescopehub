@@ -1,0 +1,70 @@
+---
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="border-t border-[var(--color-nebula-gray)]/30 mt-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <!-- Brand -->
+      <div class="md:col-span-2">
+        <a href="/" class="inline-flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-electric-blue)] via-[var(--color-neon-purple)] to-[var(--color-neon-pink)] p-[2px]">
+            <div class="w-full h-full rounded-xl bg-[var(--color-void-black)] flex items-center justify-center">
+              <span class="text-xl font-bold bg-gradient-to-r from-[var(--color-neon-cyan)] to-[var(--color-neon-purple)] bg-clip-text text-transparent">
+                FS
+              </span>
+            </div>
+          </div>
+          <span class="text-xl font-bold">FutureScopeHub</span>
+        </a>
+        <p class="text-[var(--color-text-muted)] text-sm max-w-md">
+          Your daily gateway to the future. We blend AI-powered insights with human curation to bring you the most compelling stories in tech, entertainment, and world news.
+        </p>
+        
+        <div class="flex items-center gap-4 mt-6">
+          <a href="/rss.xml" class="p-2 rounded-lg bg-[var(--color-galaxy-dark)] hover:bg-[var(--color-nebula-gray)] transition-colors" title="RSS Feed">
+            <svg class="w-5 h-5 text-[var(--color-sunset-orange)]" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z"/>
+            </svg>
+          </a>
+          <a href="https://twitter.com/futurescopehub" target="_blank" class="p-2 rounded-lg bg-[var(--color-galaxy-dark)] hover:bg-[var(--color-nebula-gray)] transition-colors" title="Twitter/X">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+      
+      <!-- Categories -->
+      <div>
+        <h4 class="font-semibold text-white mb-4">Categories</h4>
+        <ul class="space-y-2">
+          <li><a href="/category/tech" class="text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">Tech</a></li>
+          <li><a href="/category/entertainment" class="text-[var(--color-text-muted)] hover:text-[var(--color-neon-pink)] transition-colors">Entertainment</a></li>
+          <li><a href="/category/news" class="text-[var(--color-text-muted)] hover:text-[var(--color-sunset-orange)] transition-colors">News</a></li>
+        </ul>
+      </div>
+      
+      <!-- Info -->
+      <div>
+        <h4 class="font-semibold text-white mb-4">Info</h4>
+        <ul class="space-y-2">
+          <li><a href="/about" class="text-[var(--color-text-muted)] hover:text-white transition-colors">About</a></li>
+          <li><a href="/privacy" class="text-[var(--color-text-muted)] hover:text-white transition-colors">Privacy</a></li>
+          <li><a href="/disclaimer" class="text-[var(--color-text-muted)] hover:text-white transition-colors">AI Disclaimer</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- Bottom Bar -->
+    <div class="mt-12 pt-8 border-t border-[var(--color-nebula-gray)]/30 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <p class="text-sm text-[var(--color-text-muted)]">
+        © {currentYear} FutureScopeHub. Built with AI. Curated with care.
+      </p>
+      <div class="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
+        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+        <span>Powered by Gemini 3 + GitHub Actions</span>
+      </div>
+    </div>
+  </div>
+</footer>

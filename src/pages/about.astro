@@ -1,0 +1,90 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Header from '@components/Header.astro';
+import Footer from '@components/Footer.astro';
+---
+
+<BaseLayout title="About" description="Learn about FutureScopeHub and our AI-powered approach to content.">
+  <Header />
+  
+  <main class="pt-24 pb-16">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <article class="article-content">
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-white mb-8">
+          About <span class="text-[var(--color-neon-cyan)]">FutureScopeHub</span>
+        </h1>
+        
+        <div class="p-6 rounded-2xl bg-gradient-to-r from-[var(--color-galaxy-dark)] to-[var(--color-deep-space)] border border-[var(--color-neon-cyan)]/30 mb-10">
+          <p class="text-lg text-[var(--color-text-secondary)] m-0">
+            We're not just another news site. We're an experiment in AI-augmented journalism, 
+            where cutting-edge language models help curate and synthesize the stories that matter.
+          </p>
+        </div>
+        
+        <h2>Our Mission</h2>
+        <p>
+          In a world drowning in information, FutureScopeHub exists to be your intelligent filter. 
+          We leverage advanced AI (powered by Google's Gemini 3) to scan hundreds of sources, 
+          identify the signal in the noise, and deliver insights that are:
+        </p>
+        <ul>
+          <li><strong>Timely</strong> — Updated daily through automated pipelines</li>
+          <li><strong>Verified</strong> — Grounded with real-time search to prevent hallucinations</li>
+          <li><strong>Engaging</strong> — Written in a style that respects your time</li>
+        </ul>
+        
+        <h2>How It Works</h2>
+        <p>
+          Every day, our automated system:
+        </p>
+        <ol>
+          <li>Scans RSS feeds and news APIs for trending stories in tech, entertainment, and world news</li>
+          <li>Synthesizes multiple sources using Gemini 3 Flash for speed and Pro for refinement</li>
+          <li>Verifies facts using Google Search Grounding to ensure accuracy</li>
+          <li>Generates original imagery using Imagen 3</li>
+          <li>Deploys to our lightning-fast static site via GitHub Actions</li>
+        </ol>
+        
+        <h2>The Human Element</h2>
+        <p>
+          While AI does the heavy lifting, every piece of content is reviewed before publication. 
+          We believe in AI as a tool, not a replacement. The final editorial judgment—what to publish, 
+          how to frame it, and when to add context—remains human.
+        </p>
+        
+        <h2>Our Stack</h2>
+        <div class="grid grid-cols-2 gap-4 my-8">
+          <div class="p-4 rounded-xl bg-[var(--color-galaxy-dark)]">
+            <div class="text-2xl mb-2">⚡</div>
+            <div class="font-semibold text-white">Astro</div>
+            <div class="text-sm text-[var(--color-text-muted)]">Static Site Generator</div>
+          </div>
+          <div class="p-4 rounded-xl bg-[var(--color-galaxy-dark)]">
+            <div class="text-2xl mb-2">🤖</div>
+            <div class="font-semibold text-white">Gemini 3</div>
+            <div class="text-sm text-[var(--color-text-muted)]">AI Intelligence</div>
+          </div>
+          <div class="p-4 rounded-xl bg-[var(--color-galaxy-dark)]">
+            <div class="text-2xl mb-2">🚀</div>
+            <div class="font-semibold text-white">GitHub Actions</div>
+            <div class="text-sm text-[var(--color-text-muted)]">Automation</div>
+          </div>
+          <div class="p-4 rounded-xl bg-[var(--color-galaxy-dark)]">
+            <div class="text-2xl mb-2">🌐</div>
+            <div class="font-semibold text-white">GitHub Pages</div>
+            <div class="text-sm text-[var(--color-text-muted)]">Hosting (Free)</div>
+          </div>
+        </div>
+        
+        <h2>Contact</h2>
+        <p>
+          Got feedback? Found an error? We'd love to hear from you.
+          <br />
+          Reach out on Twitter/X: <a href="https://twitter.com/futurescopehub">@FutureScopeHub</a>
+        </p>
+      </article>
+    </div>
+  </main>
+  
+  <Footer />
+</BaseLayout>

@@ -1,0 +1,92 @@
+---
+interface Props {
+  latestPost?: {
+    title: string;
+    description: string;
+    slug: string;
+    category: string;
+    heroImage?: string;
+  };
+}
+
+const { latestPost } = Astro.props;
+---
+
+<section class="relative min-h-[70vh] flex items-center justify-center overflow-hidden pt-16">
+  <!-- Animated Background -->
+  <div class="absolute inset-0">
+    <!-- Gradient Orbs -->
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--color-electric-blue)] rounded-full blur-[128px] opacity-20 animate-pulse"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[var(--color-neon-purple)] rounded-full blur-[128px] opacity-20 animate-pulse" style="animation-delay: 1s;"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[var(--color-neon-pink)] rounded-full blur-[200px] opacity-10"></div>
+  </div>
+  
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <!-- Badge -->
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--color-galaxy-dark)]/80 border border-[var(--color-nebula-gray)] backdrop-blur-sm mb-8">
+      <span class="w-2 h-2 rounded-full bg-[var(--color-neon-cyan)] pulse-live"></span>
+      <span class="text-sm font-medium text-[var(--color-text-secondary)]">Updated Daily by AI</span>
+    </div>
+    
+    <!-- Main Headline -->
+    <h1 class="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
+      <span class="block text-white">The Future is</span>
+      <span class="block bg-gradient-to-r from-[var(--color-neon-cyan)] via-[var(--color-neon-purple)] to-[var(--color-neon-pink)] bg-clip-text text-transparent">
+        Already Here
+      </span>
+    </h1>
+    
+    <!-- Subtitle -->
+    <p class="text-lg sm:text-xl text-[var(--color-text-secondary)] max-w-2xl mx-auto mb-10">
+      Tech breakthroughs. Entertainment buzz. Breaking news.
+      <br class="hidden sm:block" />
+      All curated with AI precision, delivered with human passion.
+    </p>
+    
+    <!-- CTA Buttons -->
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+      <a 
+        href="#latest" 
+        class="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-[var(--color-electric-blue)] to-[var(--color-neon-purple)] text-white font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-[var(--color-neon-purple)]/25"
+      >
+        <span>Explore Stories</span>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        </svg>
+      </a>
+      
+      <a 
+        href="/rss.xml" 
+        class="inline-flex items-center gap-2 px-8 py-4 rounded-xl border border-[var(--color-nebula-gray)] text-white font-semibold hover:bg-[var(--color-galaxy-dark)] transition-colors"
+      >
+        <svg class="w-5 h-5 text-[var(--color-sunset-orange)]" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z"/>
+        </svg>
+        <span>Subscribe via RSS</span>
+      </a>
+    </div>
+    
+    <!-- Stats -->
+    <div class="mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto">
+      <div class="text-center">
+        <div class="text-2xl sm:text-3xl font-bold text-[var(--color-neon-cyan)]">24/7</div>
+        <div class="text-xs sm:text-sm text-[var(--color-text-muted)] mt-1">Updates</div>
+      </div>
+      <div class="text-center">
+        <div class="text-2xl sm:text-3xl font-bold text-[var(--color-neon-purple)]">3</div>
+        <div class="text-xs sm:text-sm text-[var(--color-text-muted)] mt-1">Categories</div>
+      </div>
+      <div class="text-center">
+        <div class="text-2xl sm:text-3xl font-bold text-[var(--color-neon-pink)]">∞</div>
+        <div class="text-xs sm:text-sm text-[var(--color-text-muted)] mt-1">Insights</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Scroll Indicator -->
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+    <svg class="w-6 h-6 text-[var(--color-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+    </svg>
+  </div>
+</section>

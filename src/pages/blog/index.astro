@@ -1,0 +1,60 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Header from '@components/Header.astro';
+import Footer from '@components/Footer.astro';
+import PostCard from '@components/PostCard.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('blog');
+const sortedPosts = allPosts.sort((a, b) => 
+  new Date(b.data.pubDate).valueOf() - new Date(a.data.pubDate).valueOf()
+);
+---
+
+<BaseLayout title="All Posts" description="Browse all articles on FutureScopeHub covering tech, entertainment, and news.">
+  <Header />
+  
+  <main class="pt-24 pb-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Page Header -->
+      <div class="text-center mb-12">
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-white mb-4">
+          All <span class="bg-gradient-to-r from-[var(--color-neon-cyan)] to-[var(--color-neon-purple)] bg-clip-text text-transparent">Stories</span>
+        </h1>
+        <p class="text-lg text-[var(--color-text-secondary)] max-w-2xl mx-auto">
+          Explore our complete archive of tech breakthroughs, entertainment buzz, and breaking news.
+        </p>
+      </div>
+      
+      <!-- Posts Grid -->
+      {sortedPosts.length === 0 ? (
+        <div class="text-center py-20 border border-dashed border-[var(--color-nebula-gray)] rounded-2xl">
+          <div class="text-6xl mb-4">🚀</div>
+          <h3 class="text-xl font-semibold text-white mb-2">Content Coming Soon!</h3>
+          <p class="text-[var(--color-text-muted)]">
+            The AI is warming up. First posts will appear after the automation runs.
+          </p>
+        </div>
+      ) : (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {sortedPosts.map(post => (
+            <PostCard 
+              title={post.data.title}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              heroImage={post.data.heroImage}
+              category={post.data.category}
+              slug={post.slug}
+              tags={post.data.tags}
+              readingTime={post.data.readingTime}
+              featured={post.data.featured}
+              tldr={post.data.tldr}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  </main>
+  
+  <Footer />
+</BaseLayout>
