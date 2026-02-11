@@ -4,7 +4,8 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  site: 'https://futurescopehub.com',
+  site: 'https://faresesmail-eng.github.io',
+  base: '/futurescopehub',
   integrations: [mdx(), sitemap()],
   vite: {
     plugins: [tailwindcss()]
