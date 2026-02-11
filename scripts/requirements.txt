@@ -1,16 +1,29 @@
-# FutureScopeHub - Python Dependencies# FutureScopeHub - Python Dependencies
+# FutureScopeHub - Python Dependencies# FutureScopeHub - Python Dependencies# FutureScopeHub - Python Dependencies
 
-# =====================================# =====================================
+# =====================================
 
-# Credit-Card-Free Edition - Uses Google AI Studio (FREE)# These are required for the automation scripts
+# Credit-Card-Free Edition - Uses Google AI Studio (FREE)# =====================================# =====================================
 
 
 
-# Google Generative AI SDK (for AI Studio - FREE, no billing required!)# Google Gemini SDK (2026 version with grounding support)
+# Google Generative AI SDK (for AI Studio - FREE, no billing required!)# Credit-Card-Free Edition - Uses Google AI Studio (FREE)# These are required for the automation scripts
+
+# This is different from google-cloud-aiplatform which requires billing
+
+google-generativeai>=0.8.0
+
+
+
+# RSS Feed Parsing# Google Generative AI SDK (for AI Studio - FREE, no billing required!)# Google Gemini SDK (2026 version with grounding support)
+
+feedparser>=6.0.0
 
 # This is different from google-cloud-aiplatform which requires billinggoogle-genai>=1.0.0
 
-google-generativeai>=0.8.0
+# URL Slug Generation
+
+python-slugify>=8.0.0google-generativeai>=0.8.0
+
 
 # RSS Feed Parsing
 

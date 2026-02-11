@@ -1,350 +1,697 @@
-""""""
+"""""""""
 
-FutureScopeHub - Daily Digest Generator (Credit-Card-Free Edition)FutureScopeHub - Daily Digest Generator
+FutureScopeHub - Daily Digest Generator (Credit-Card-Free Edition)
 
-===========================================================================================================
+===================================================================FutureScopeHub - Daily Digest Generator (Credit-Card-Free Edition)FutureScopeHub - Daily Digest Generator
+
+
+
+This script uses Google AI Studio (FREE) instead of Vertex AI.===========================================================================================================
+
+No credit card required - just a Google Account and API key from AI Studio.
 
 This script uses Google AI Studio (FREE) instead of Vertex AI.This script is the core of the automated content pipeline.
 
-No credit card required - just a Google Account and API key from AI Studio.It fetches news, synthesizes content using Gemini 3, and generates blog posts.
+How to get your FREE API Key:
 
+1. Go to https://aistudio.google.com/No credit card required - just a Google Account and API key from AI Studio.It fetches news, synthesizes content using Gemini 3, and generates blog posts.
 
+2. Sign in with your Google Account
+
+3. Click "Get API Key" then "Create API Key"
+
+4. Copy the key (starts with "AIzaSy...")
 
 How to get your FREE API Key:Requirements:
 
-1. Go to https://aistudio.google.com/- google-genai (Vertex AI SDK)
+Requirements:
 
-2. Sign in with your Google Account- feedparser
+- google-generativeai (NOT google-cloud-aiplatform)1. Go to https://aistudio.google.com/- google-genai (Vertex AI SDK)
 
-3. Click "Get API Key" → "Create API Key"- python-slugify
+- feedparser
 
-4. Copy the key (starts with "AIzaSy...")- Pillow (for image handling)
+- python-slugify2. Sign in with your Google Account- feedparser
 
 
 
-Requirements:Environment Variables:
+Environment Variables:3. Click "Get API Key" → "Create API Key"- python-slugify
 
-- google-generativeai (NOT google-cloud-aiplatform)- GOOGLE_API_KEY: Your Gemini API key from Google AI Studio or Vertex AI
+- GOOGLE_API_KEY: Your FREE API key from Google AI Studio
 
-- feedparser"""
+"""4. Copy the key (starts with "AIzaSy...")- Pillow (for image handling)
 
-- python-slugify
+
 
 import os
 
-Environment Variables:import json
+import json
 
-- GOOGLE_API_KEY: Your FREE API key from Google AI Studioimport re
+import reRequirements:Environment Variables:
 
-"""from datetime import datetime, timezone
+from datetime import datetime, timezone
 
-from pathlib import Path
+from pathlib import Path- google-generativeai (NOT google-cloud-aiplatform)- GOOGLE_API_KEY: Your Gemini API key from Google AI Studio or Vertex AI
 
-import osfrom typing import Optional
+from typing import Optional
 
-import jsonimport hashlib
+import hashlib- feedparser"""
 
-import re
+import time
 
-from datetime import datetime, timezone# Third-party imports
+- python-slugify
 
-from pathlib import Pathtry:
+# Third-party imports
 
-from typing import Optional    import feedparser
+try:import os
 
-import hashlib    from slugify import slugify
+    import feedparser
 
-import time    from google import genai
-
-    from google.genai import types
-
-# Third-party importsexcept ImportError as e:
-
-try:    print(f"Missing dependency: {e}")
-
-    import feedparser    print("Run: pip install google-genai feedparser python-slugify")
-
-    from slugify import slugify    exit(1)
+    from slugify import slugifyEnvironment Variables:import json
 
     import google.generativeai as genai
 
-except ImportError as e:
+except ImportError as e:- GOOGLE_API_KEY: Your FREE API key from Google AI Studioimport re
 
-    print(f"Missing dependency: {e}")# ============================================================================
+    print(f"Missing dependency: {e}")
 
-    print("Run: pip install google-generativeai feedparser python-slugify")# CONFIGURATION
+    print("Run: pip install google-generativeai feedparser python-slugify")"""from datetime import datetime, timezone
 
-    exit(1)# ============================================================================
+    exit(1)
+
+from pathlib import Path
 
 
 
-class Config:
+# ============================================================================import osfrom typing import Optional
 
-# ============================================================================    """Central configuration for the digest generator."""
+# CONFIGURATION
 
-# CONFIGURATION    
+# ============================================================================import jsonimport hashlib
 
-# ============================================================================    # API Configuration
+
+
+class Config:import re
+
+    """Central configuration for the digest generator."""
+
+    from datetime import datetime, timezone# Third-party imports
+
+    # API Configuration - FREE from Google AI Studio
+
+    # Get yours at: https://aistudio.google.com/apikeyfrom pathlib import Pathtry:
 
     GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
 
-class Config:    
+    from typing import Optional    import feedparser
 
-    """Central configuration for the digest generator."""    # Model Selection (2026 Gemini 3 family)
+    # Model Selection - using free models from AI Studio
 
-        MODEL_WRITER = "gemini-2.0-flash"  # Fast drafting - update to gemini-3-flash when available
+    MODEL_NAME = "gemini-1.5-flash"  # Fast and freeimport hashlib    from slugify import slugify
 
-    # API Configuration - FREE from Google AI Studio    MODEL_EDITOR = "gemini-2.0-pro"    # Quality refinement - update to gemini-3-pro when available
+    
 
-    # Get yours at: https://aistudio.google.com/apikey    
+    # Content pathsimport time    from google import genai
 
-    GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")    # Content Settings
+    CONTENT_DIR = Path("src/content/blog")
 
-        OUTPUT_DIR = Path("src/content/blog")
+        from google.genai import types
 
-    # Model Selection - Available FREE in AI Studio    IMAGE_DIR = Path("public/images/posts")
+    # Categories to cover
 
-    # Gemini 2.0 Flash: Fast, efficient, great for content generation    
+    CATEGORIES = ["tech", "entertainment", "news"]# Third-party importsexcept ImportError as e:
 
-    # Gemini 1.5 Pro: Higher quality, 1M token context window    # RSS Feeds to Monitor (Tech, Entertainment, News)
+    
 
-    MODEL_WRITER = "gemini-2.0-flash-exp"  # Fast drafting (FREE)    RSS_FEEDS = {
+    # RSS feeds organized by categorytry:    print(f"Missing dependency: {e}")
 
-    MODEL_EDITOR = "gemini-1.5-pro"        # Quality refinement (FREE, 1M context!)        "tech": [
+    RSS_FEEDS = {
 
-                "https://techcrunch.com/feed/",
+        "tech": [    import feedparser    print("Run: pip install google-genai feedparser python-slugify")
 
-    # Content Settings            "https://www.theverge.com/rss/index.xml",
+            "https://feeds.arstechnica.com/arstechnica/technology-lab",
 
-    OUTPUT_DIR = Path("src/content/blog")            "https://arstechnica.com/feed/",
+            "https://www.theverge.com/rss/index.xml",    from slugify import slugify    exit(1)
 
-    IMAGE_DIR = Path("public/images/posts")            "https://feeds.wired.com/wired/index",
+            "https://techcrunch.com/feed/",
 
-            ],
+            "https://www.wired.com/feed/rss",    import google.generativeai as genai
 
-    # RSS Feeds to Monitor (Tech, Entertainment, News)        "entertainment": [
+        ],
 
-    RSS_FEEDS = {            "https://variety.com/feed/",
+        "entertainment": [except ImportError as e:
 
-        "tech": [            "https://www.hollywoodreporter.com/feed/",
+            "https://www.polygon.com/rss/index.xml",
 
-            "https://techcrunch.com/feed/",            "https://ew.com/feed/",
+            "https://kotaku.com/rss",    print(f"Missing dependency: {e}")# ============================================================================
 
-            "https://www.theverge.com/rss/index.xml",        ],
+            "https://www.ign.com/articles.rss",
 
-            "https://arstechnica.com/feed/",        "news": [
+            "https://feeds.feedburner.com/ign/games-all",    print("Run: pip install google-generativeai feedparser python-slugify")# CONFIGURATION
 
-            "https://feeds.wired.com/wired/index",            "https://feeds.bbci.co.uk/news/world/rss.xml",
+        ],
 
-        ],            "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+        "news": [    exit(1)# ============================================================================
 
-        "entertainment": [            "https://feeds.reuters.com/reuters/topNews",
+            "https://feeds.bbci.co.uk/news/technology/rss.xml",
 
-            "https://variety.com/feed/",        ]
+            "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml",
 
-            "https://www.hollywoodreporter.com/feed/",    }
+            "https://www.reddit.com/r/technology/.rss",
 
-            "https://ew.com/feed/",    
-
-        ],    # Generation Settings
-
-        "news": [    MAX_ARTICLES_PER_CATEGORY = 3
-
-            "https://feeds.bbci.co.uk/news/world/rss.xml",    MIN_WORD_COUNT = 800
-
-            "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",    MAX_WORD_COUNT = 1500
-
-        ]
+        ],class Config:
 
     }
 
-    # ============================================================================
+    # ============================================================================    """Central configuration for the digest generator."""
 
-    # Generation Settings# SYSTEM PROMPTS
+    # Generation settings
 
-    MAX_ARTICLES_PER_CATEGORY = 3# ============================================================================
+    MAX_ARTICLES_PER_CATEGORY = 5# CONFIGURATION    
 
-    MIN_WORD_COUNT = 800
+    POST_MIN_WORDS = 800
 
-    MAX_WORD_COUNT = 1500WRITER_SYSTEM_PROMPT = """You are a senior content writer for FutureScopeHub, a modern tech and culture blog.
+    POST_MAX_WORDS = 1500# ============================================================================    # API Configuration
+
+
+
+    GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
+
+# ============================================================================
+
+# NEWS FETCHERclass Config:    
+
+# ============================================================================
+
+    """Central configuration for the digest generator."""    # Model Selection (2026 Gemini 3 family)
+
+class NewsFetcher:
+
+    """Fetches and aggregates news from RSS feeds."""        MODEL_WRITER = "gemini-2.0-flash"  # Fast drafting - update to gemini-3-flash when available
 
     
 
-    # Rate Limiting (AI Studio Free Tier: ~15 RPM)Your writing style is:
+    def __init__(self):    # API Configuration - FREE from Google AI Studio    MODEL_EDITOR = "gemini-2.0-pro"    # Quality refinement - update to gemini-3-pro when available
 
-    REQUEST_DELAY_SECONDS = 5  # Be respectful of free tier limits- **Engaging**: Hook readers from the first sentence. Use vivid language.
+        self.seen_titles = set()
 
-- **Conversational**: Write like you're explaining to a smart friend, not a textbook.
+        # Get yours at: https://aistudio.google.com/apikey    
 
-- **Insightful**: Don't just report facts—provide context, implications, and "so what?"
+    def fetch_category(self, category: str) -> list[dict]:
 
-# ============================================================================- **Scannable**: Use headers, bullet points, and short paragraphs for easy reading.
+        """Fetch news articles for a specific category."""    GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")    # Content Settings
 
-# SYSTEM PROMPTS- **Unique**: Add personality. Use metaphors, cultural references, and wit when appropriate.
+        feeds = Config.RSS_FEEDS.get(category, [])
 
-# ============================================================================
-
-CRITICAL RULES:
-
-WRITER_SYSTEM_PROMPT = """You are a senior content writer for FutureScopeHub, a modern tech and culture blog.1. NEVER start with "In a world where..." or "In today's fast-paced..."
-
-2. NEVER use phrases like "As an AI language model" or "I cannot..."
-
-Your writing style is:3. NEVER fabricate quotes, statistics, or sources
-
-- **Engaging**: Hook readers from the first sentence. Use vivid language.4. Always ground claims in the provided source material
-
-- **Conversational**: Write like you're explaining to a smart friend, not a textbook.5. Use Markdown formatting with H2 (##) and H3 (###) headers
-
-- **Insightful**: Don't just report facts—provide context, implications, and "so what?"6. Include a compelling hook in the first paragraph
-
-- **Scannable**: Use headers, bullet points, and short paragraphs for easy reading.7. End with a thought-provoking conclusion or call-to-action
-
-- **Unique**: Add personality. Use metaphors, cultural references, and wit when appropriate.
-
-Output ONLY the article body in Markdown. Do not include the title or frontmatter."""
-
-CRITICAL RULES:
-
-1. NEVER start with "In a world where..." or "In today's fast-paced..."EDITOR_SYSTEM_PROMPT = """You are the senior editor for FutureScopeHub. Your job is to polish drafts.
-
-2. NEVER use phrases like "As an AI language model" or "I cannot..."
-
-3. NEVER fabricate quotes, statistics, or sources - only use info from the provided articlesReview the draft and improve:
-
-4. Use Markdown formatting with H2 (##) and H3 (###) headers1. **Flow**: Ensure smooth transitions between paragraphs
-
-5. Include a compelling hook in the first paragraph2. **Clarity**: Simplify complex sentences without dumbing down
-
-6. End with a thought-provoking conclusion or call-to-action3. **Engagement**: Strengthen hooks and calls-to-action
-
-7. Keep paragraphs SHORT (2-3 sentences max)4. **Accuracy**: Flag any claims that seem unsupported
-
-5. **Voice**: Ensure consistent, engaging tone throughout
-
-Output ONLY the article body in Markdown. Do not include the title or frontmatter."""
-
-Also generate:
-
-EDITOR_SYSTEM_PROMPT = """You are the senior editor for FutureScopeHub. Your job is to polish drafts and generate metadata.- A compelling SEO title (max 60 chars, include power words)
-
-- A meta description (max 155 chars, include call-to-action)
-
-Review the draft and:- 3-5 relevant tags (lowercase, single words or hyphenated)
-
-1. Improve flow and transitions- A TL;DR summary (max 200 chars, punchy and informative)
-
-2. Strengthen the hook and conclusion- Reading time estimate
-
-3. Ensure consistent, engaging tone
-
-4. Fix any awkward phrasingReturn your response in this exact JSON format:
-
-{
-
-Then generate metadata. Return your response in this EXACT JSON format (no markdown code blocks):    "title": "Your SEO-optimized title here",
-
-    "description": "Your meta description here",
-
-{    "tags": ["tag1", "tag2", "tag3"],
-
-    "title": "Catchy SEO title (max 60 chars, use power words)",    "tldr": "Quick summary for scanners",
-
-    "description": "Meta description with call-to-action (max 155 chars)",    "readingTime": "X min read",
-
-    "tags": ["tag1", "tag2", "tag3"],    "content": "The full polished article in Markdown",
-
-    "tldr": "Punchy 1-sentence summary for scanners (max 200 chars)",    "quality_score": 8.5,
-
-    "readingTime": "X min read",    "notes": "Any editorial notes or concerns"
-
-    "content": "The full polished article in Markdown format"}"""
-
-}"""
-
-
-
-# ============================================================================
-
-# ============================================================================# CORE FUNCTIONS
-
-# CORE FUNCTIONS# ============================================================================
-
-# ============================================================================
-
-def initialize_client() -> genai.Client:
-
-def initialize_client() -> None:    """Initialize the Gemini client."""
-
-    """Initialize the Gemini client with AI Studio API key."""    if not Config.GOOGLE_API_KEY:
-
-    if not Config.GOOGLE_API_KEY:        raise ValueError("GOOGLE_API_KEY environment variable is required")
-
-        raise ValueError(    
-
-            "GOOGLE_API_KEY environment variable is required!\n"    return genai.Client(api_key=Config.GOOGLE_API_KEY)
-
-            "Get your FREE key at: https://aistudio.google.com/apikey"
-
-        )
-
-    def fetch_rss_articles(category: str, limit: int = 5) -> list[dict]:
-
-    genai.configure(api_key=Config.GOOGLE_API_KEY)    """Fetch and parse RSS feeds for a category."""
-
-    print("✅ Connected to Google AI Studio (FREE tier)")    articles = []
-
-    feeds = Config.RSS_FEEDS.get(category, [])
-
-    
-
-def fetch_rss_articles(category: str, limit: int = 5) -> list[dict]:    for feed_url in feeds:
-
-    """Fetch and parse RSS feeds for a category."""        try:
-
-    articles = []            feed = feedparser.parse(feed_url)
-
-    feeds = Config.RSS_FEEDS.get(category, [])            for entry in feed.entries[:limit]:
-
-                    articles.append({
-
-    for feed_url in feeds:                    "title": entry.get("title", ""),
-
-        try:                    "summary": entry.get("summary", entry.get("description", "")),
-
-            feed = feedparser.parse(feed_url)                    "link": entry.get("link", ""),
-
-            for entry in feed.entries[:limit]:                    "published": entry.get("published", ""),
-
-                # Clean HTML from summary                    "source": feed.feed.get("title", feed_url),
-
-                summary = entry.get("summary", entry.get("description", ""))                })
-
-                summary = re.sub(r'<[^>]+>', '', summary)[:500]  # Strip HTML, limit length        except Exception as e:
-
-                            print(f"Warning: Failed to fetch {feed_url}: {e}")
-
-                articles.append({    
-
-                    "title": entry.get("title", ""),    # Remove duplicates based on title similarity
-
-                    "summary": summary,    seen_titles = set()
-
-                    "link": entry.get("link", ""),    unique_articles = []
-
-                    "published": entry.get("published", ""),    for article in articles:
-
-                    "source": feed.feed.get("title", feed_url),        title_hash = hashlib.md5(article["title"].lower().encode()).hexdigest()[:8]
-
-                })        if title_hash not in seen_titles:
-
-        except Exception as e:            seen_titles.add(title_hash)
-
-            print(f"   ⚠️ Failed to fetch {feed_url}: {e}")            unique_articles.append(article)
+        articles = []        OUTPUT_DIR = Path("src/content/blog")
 
         
 
-    # Remove duplicates based on title similarity    return unique_articles[:Config.MAX_ARTICLES_PER_CATEGORY * 2]
+        for feed_url in feeds:    # Model Selection - Available FREE in AI Studio    IMAGE_DIR = Path("public/images/posts")
+
+            try:
+
+                feed = feedparser.parse(feed_url)    # Gemini 2.0 Flash: Fast, efficient, great for content generation    
+
+                for entry in feed.entries[:Config.MAX_ARTICLES_PER_CATEGORY]:
+
+                    # Skip duplicates    # Gemini 1.5 Pro: Higher quality, 1M token context window    # RSS Feeds to Monitor (Tech, Entertainment, News)
+
+                    title_hash = hashlib.md5(entry.title.encode()).hexdigest()
+
+                    if title_hash in self.seen_titles:    MODEL_WRITER = "gemini-2.0-flash-exp"  # Fast drafting (FREE)    RSS_FEEDS = {
+
+                        continue
+
+                    self.seen_titles.add(title_hash)    MODEL_EDITOR = "gemini-1.5-pro"        # Quality refinement (FREE, 1M context!)        "tech": [
+
+                    
+
+                    articles.append({                "https://techcrunch.com/feed/",
+
+                        "title": entry.get("title", ""),
+
+                        "summary": entry.get("summary", entry.get("description", "")),    # Content Settings            "https://www.theverge.com/rss/index.xml",
+
+                        "link": entry.get("link", ""),
+
+                        "source": feed.feed.get("title", feed_url),    OUTPUT_DIR = Path("src/content/blog")            "https://arstechnica.com/feed/",
+
+                        "published": entry.get("published", ""),
+
+                    })    IMAGE_DIR = Path("public/images/posts")            "https://feeds.wired.com/wired/index",
+
+            except Exception as e:
+
+                print(f"  Warning: Failed to fetch {feed_url}: {e}")            ],
+
+                continue
+
+            # RSS Feeds to Monitor (Tech, Entertainment, News)        "entertainment": [
+
+        return articles[:Config.MAX_ARTICLES_PER_CATEGORY * 2]
+
+        RSS_FEEDS = {            "https://variety.com/feed/",
+
+    def fetch_all(self) -> dict[str, list[dict]]:
+
+        """Fetch news for all categories."""        "tech": [            "https://www.hollywoodreporter.com/feed/",
+
+        all_news = {}
+
+        for category in Config.CATEGORIES:            "https://techcrunch.com/feed/",            "https://ew.com/feed/",
+
+            print(f"  Fetching {category} news...")
+
+            all_news[category] = self.fetch_category(category)            "https://www.theverge.com/rss/index.xml",        ],
+
+            print(f"    Found {len(all_news[category])} articles")
+
+        return all_news            "https://arstechnica.com/feed/",        "news": [
+
+
+
+            "https://feeds.wired.com/wired/index",            "https://feeds.bbci.co.uk/news/world/rss.xml",
+
+# ============================================================================
+
+# AI WRITER (Credit-Card-Free with Google AI Studio)        ],            "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+
+# ============================================================================
+
+        "entertainment": [            "https://feeds.reuters.com/reuters/topNews",
+
+class AIWriter:
+
+    """Generates blog posts using Google AI Studio (FREE)."""            "https://variety.com/feed/",        ]
+
+    
+
+    def __init__(self):            "https://www.hollywoodreporter.com/feed/",    }
+
+        if not Config.GOOGLE_API_KEY:
+
+            raise ValueError(            "https://ew.com/feed/",    
+
+                "GOOGLE_API_KEY not set! Get your FREE key at: "
+
+                "https://aistudio.google.com/apikey"        ],    # Generation Settings
+
+            )
+
+                "news": [    MAX_ARTICLES_PER_CATEGORY = 3
+
+        # Configure the AI Studio client
+
+        genai.configure(api_key=Config.GOOGLE_API_KEY)            "https://feeds.bbci.co.uk/news/world/rss.xml",    MIN_WORD_COUNT = 800
+
+        self.model = genai.GenerativeModel(Config.MODEL_NAME)
+
+        print(f"  AI Writer initialized with {Config.MODEL_NAME}")            "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",    MAX_WORD_COUNT = 1500
+
+    
+
+    def generate_post(self, category: str, articles: list[dict]) -> Optional[dict]:        ]
+
+        """Generate a blog post from news articles."""
+
+        if not articles:    }
+
+            print(f"  No articles for {category}, skipping...")
+
+            return None    # ============================================================================
+
+        
+
+        # Build the prompt    # Generation Settings# SYSTEM PROMPTS
+
+        articles_text = "\n\n".join([
+
+            f"**{a['title']}** (Source: {a['source']})\n{a['summary']}"    MAX_ARTICLES_PER_CATEGORY = 3# ============================================================================
+
+            for a in articles[:5]
+
+        ])    MIN_WORD_COUNT = 800
+
+        
+
+        prompt = f"""You are a skilled tech blogger writing for FutureScopeHub, a blog covering tech, entertainment, and news.    MAX_WORD_COUNT = 1500WRITER_SYSTEM_PROMPT = """You are a senior content writer for FutureScopeHub, a modern tech and culture blog.
+
+
+
+Write an engaging, SEO-optimized blog post based on these {category} news items:    
+
+
+
+{articles_text}    # Rate Limiting (AI Studio Free Tier: ~15 RPM)Your writing style is:
+
+
+
+REQUIREMENTS:    REQUEST_DELAY_SECONDS = 5  # Be respectful of free tier limits- **Engaging**: Hook readers from the first sentence. Use vivid language.
+
+1. Create a catchy, attention-grabbing title (not generic)
+
+2. Write {Config.POST_MIN_WORDS}-{Config.POST_MAX_WORDS} words- **Conversational**: Write like you're explaining to a smart friend, not a textbook.
+
+3. Use a conversational but informative tone
+
+4. Include relevant subheadings (## format)- **Insightful**: Don't just report facts—provide context, implications, and "so what?"
+
+5. Add a "TL;DR" section at the end with 2-3 bullet points
+
+6. Make it engaging and easy to read - not boring!# ============================================================================- **Scannable**: Use headers, bullet points, and short paragraphs for easy reading.
+
+7. Connect the news items into a coherent narrative when possible
+
+# SYSTEM PROMPTS- **Unique**: Add personality. Use metaphors, cultural references, and wit when appropriate.
+
+OUTPUT FORMAT (use exactly this JSON structure):
+
+{{# ============================================================================
+
+    "title": "Your Catchy Title Here",
+
+    "description": "A compelling 150-160 character meta description",CRITICAL RULES:
+
+    "content": "The full markdown content of the post",
+
+    "tags": ["tag1", "tag2", "tag3"],WRITER_SYSTEM_PROMPT = """You are a senior content writer for FutureScopeHub, a modern tech and culture blog.1. NEVER start with "In a world where..." or "In today's fast-paced..."
+
+    "tldr": ["Key point 1", "Key point 2", "Key point 3"]
+
+}}2. NEVER use phrases like "As an AI language model" or "I cannot..."
+
+
+
+Return ONLY valid JSON, no markdown code blocks."""Your writing style is:3. NEVER fabricate quotes, statistics, or sources
+
+
+
+        try:- **Engaging**: Hook readers from the first sentence. Use vivid language.4. Always ground claims in the provided source material
+
+            # Generate with safety settings
+
+            response = self.model.generate_content(- **Conversational**: Write like you're explaining to a smart friend, not a textbook.5. Use Markdown formatting with H2 (##) and H3 (###) headers
+
+                prompt,
+
+                generation_config=genai.types.GenerationConfig(- **Insightful**: Don't just report facts—provide context, implications, and "so what?"6. Include a compelling hook in the first paragraph
+
+                    temperature=0.8,
+
+                    max_output_tokens=4096,- **Scannable**: Use headers, bullet points, and short paragraphs for easy reading.7. End with a thought-provoking conclusion or call-to-action
+
+                ),
+
+            )- **Unique**: Add personality. Use metaphors, cultural references, and wit when appropriate.
+
+            
+
+            # Parse the responseOutput ONLY the article body in Markdown. Do not include the title or frontmatter."""
+
+            text = response.text.strip()
+
+            CRITICAL RULES:
+
+            # Clean up potential markdown code blocks
+
+            if text.startswith("```"):1. NEVER start with "In a world where..." or "In today's fast-paced..."EDITOR_SYSTEM_PROMPT = """You are the senior editor for FutureScopeHub. Your job is to polish drafts.
+
+                text = re.sub(r"^```json?\n?", "", text)
+
+                text = re.sub(r"\n?```$", "", text)2. NEVER use phrases like "As an AI language model" or "I cannot..."
+
+            
+
+            result = json.loads(text)3. NEVER fabricate quotes, statistics, or sources - only use info from the provided articlesReview the draft and improve:
+
+            result["category"] = category
+
+            result["sources"] = [a["link"] for a in articles[:5] if a.get("link")]4. Use Markdown formatting with H2 (##) and H3 (###) headers1. **Flow**: Ensure smooth transitions between paragraphs
+
+            
+
+            return result5. Include a compelling hook in the first paragraph2. **Clarity**: Simplify complex sentences without dumbing down
+
+            
+
+        except json.JSONDecodeError as e:6. End with a thought-provoking conclusion or call-to-action3. **Engagement**: Strengthen hooks and calls-to-action
+
+            print(f"  Error parsing AI response: {e}")
+
+            print(f"  Raw response: {response.text[:500]}...")7. Keep paragraphs SHORT (2-3 sentences max)4. **Accuracy**: Flag any claims that seem unsupported
+
+            return None
+
+        except Exception as e:5. **Voice**: Ensure consistent, engaging tone throughout
+
+            print(f"  Error generating post: {e}")
+
+            return NoneOutput ONLY the article body in Markdown. Do not include the title or frontmatter."""
+
+
+
+Also generate:
+
+# ============================================================================
+
+# POST WRITEREDITOR_SYSTEM_PROMPT = """You are the senior editor for FutureScopeHub. Your job is to polish drafts and generate metadata.- A compelling SEO title (max 60 chars, include power words)
+
+# ============================================================================
+
+- A meta description (max 155 chars, include call-to-action)
+
+class PostWriter:
+
+    """Writes generated content to markdown files."""Review the draft and:- 3-5 relevant tags (lowercase, single words or hyphenated)
+
+    
+
+    def __init__(self):1. Improve flow and transitions- A TL;DR summary (max 200 chars, punchy and informative)
+
+        Config.CONTENT_DIR.mkdir(parents=True, exist_ok=True)
+
+    2. Strengthen the hook and conclusion- Reading time estimate
+
+    def write_post(self, post_data: dict) -> Optional[Path]:
+
+        """Write a post to a markdown file."""3. Ensure consistent, engaging tone
+
+        if not post_data:
+
+            return None4. Fix any awkward phrasingReturn your response in this exact JSON format:
+
+        
+
+        # Generate slug and filename{
+
+        title = post_data.get("title", "Untitled")
+
+        slug = slugify(title)[:60]Then generate metadata. Return your response in this EXACT JSON format (no markdown code blocks):    "title": "Your SEO-optimized title here",
+
+        date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+        filename = f"{date_str}-{slug}.md"    "description": "Your meta description here",
+
+        filepath = Config.CONTENT_DIR / filename
+
+        {    "tags": ["tag1", "tag2", "tag3"],
+
+        # Skip if already exists
+
+        if filepath.exists():    "title": "Catchy SEO title (max 60 chars, use power words)",    "tldr": "Quick summary for scanners",
+
+            print(f"  Post already exists: {filename}")
+
+            return None    "description": "Meta description with call-to-action (max 155 chars)",    "readingTime": "X min read",
+
+        
+
+        # Build frontmatter    "tags": ["tag1", "tag2", "tag3"],    "content": "The full polished article in Markdown",
+
+        tags_yaml = "\n".join([f'  - "{tag}"' for tag in post_data.get("tags", [])])
+
+        sources_yaml = "\n".join([f'  - "{src}"' for src in post_data.get("sources", [])[:3]])    "tldr": "Punchy 1-sentence summary for scanners (max 200 chars)",    "quality_score": 8.5,
+
+        tldr_yaml = "\n".join([f'  - "{point}"' for point in post_data.get("tldr", [])])
+
+            "readingTime": "X min read",    "notes": "Any editorial notes or concerns"
+
+        frontmatter = f"""---
+
+title: "{title.replace('"', "'")}"    "content": "The full polished article in Markdown format"}"""
+
+description: "{post_data.get('description', '').replace('"', "'")}"
+
+pubDate: {datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}}"""
+
+category: "{post_data.get('category', 'tech')}"
+
+tags:
+
+{tags_yaml}
+
+sources:# ============================================================================
+
+{sources_yaml}
+
+tldr:# ============================================================================# CORE FUNCTIONS
+
+{tldr_yaml}
+
+---# CORE FUNCTIONS# ============================================================================
+
+
+
+{post_data.get('content', '')}# ============================================================================
+
+"""
+
+        def initialize_client() -> genai.Client:
+
+        # Write the file
+
+        filepath.write_text(frontmatter, encoding="utf-8")def initialize_client() -> None:    """Initialize the Gemini client."""
+
+        print(f"  Created: {filename}")
+
+        return filepath    """Initialize the Gemini client with AI Studio API key."""    if not Config.GOOGLE_API_KEY:
+
+
+
+    if not Config.GOOGLE_API_KEY:        raise ValueError("GOOGLE_API_KEY environment variable is required")
+
+# ============================================================================
+
+# MAIN EXECUTION        raise ValueError(    
+
+# ============================================================================
+
+            "GOOGLE_API_KEY environment variable is required!\n"    return genai.Client(api_key=Config.GOOGLE_API_KEY)
+
+def main():
+
+    """Main entry point for the daily digest generator."""            "Get your FREE key at: https://aistudio.google.com/apikey"
+
+    print("=" * 60)
+
+    print("FutureScopeHub Daily Digest Generator")        )
+
+    print("Credit-Card-Free Edition (Google AI Studio)")
+
+    print("=" * 60)    def fetch_rss_articles(category: str, limit: int = 5) -> list[dict]:
+
+    print()
+
+        genai.configure(api_key=Config.GOOGLE_API_KEY)    """Fetch and parse RSS feeds for a category."""
+
+    # Check for API key
+
+    if not Config.GOOGLE_API_KEY:    print("✅ Connected to Google AI Studio (FREE tier)")    articles = []
+
+        print("ERROR: GOOGLE_API_KEY environment variable not set!")
+
+        print()    feeds = Config.RSS_FEEDS.get(category, [])
+
+        print("Get your FREE API key:")
+
+        print("1. Go to https://aistudio.google.com/")    
+
+        print("2. Sign in with Google")
+
+        print("3. Click 'Get API Key' then 'Create API Key'")def fetch_rss_articles(category: str, limit: int = 5) -> list[dict]:    for feed_url in feeds:
+
+        print("4. Set it as GOOGLE_API_KEY environment variable")
+
+        exit(1)    """Fetch and parse RSS feeds for a category."""        try:
+
+    
+
+    print("[1/4] Initializing...")    articles = []            feed = feedparser.parse(feed_url)
+
+    fetcher = NewsFetcher()
+
+    writer = AIWriter()    feeds = Config.RSS_FEEDS.get(category, [])            for entry in feed.entries[:limit]:
+
+    post_writer = PostWriter()
+
+                        articles.append({
+
+    print()
+
+    print("[2/4] Fetching news...")    for feed_url in feeds:                    "title": entry.get("title", ""),
+
+    all_news = fetcher.fetch_all()
+
+            try:                    "summary": entry.get("summary", entry.get("description", "")),
+
+    print()
+
+    print("[3/4] Generating posts with AI...")            feed = feedparser.parse(feed_url)                    "link": entry.get("link", ""),
+
+    generated_posts = []
+
+                for entry in feed.entries[:limit]:                    "published": entry.get("published", ""),
+
+    for category in Config.CATEGORIES:
+
+        articles = all_news.get(category, [])                # Clean HTML from summary                    "source": feed.feed.get("title", feed_url),
+
+        if articles:
+
+            print(f"  Writing {category} post...")                summary = entry.get("summary", entry.get("description", ""))                })
+
+            post = writer.generate_post(category, articles)
+
+            if post:                summary = re.sub(r'<[^>]+>', '', summary)[:500]  # Strip HTML, limit length        except Exception as e:
+
+                generated_posts.append(post)
+
+                # Small delay to avoid rate limits on free tier                            print(f"Warning: Failed to fetch {feed_url}: {e}")
+
+                time.sleep(2)
+
+                    articles.append({    
+
+    print()
+
+    print("[4/4] Saving posts...")                    "title": entry.get("title", ""),    # Remove duplicates based on title similarity
+
+    created_files = []
+
+    for post in generated_posts:                    "summary": summary,    seen_titles = set()
+
+        filepath = post_writer.write_post(post)
+
+        if filepath:                    "link": entry.get("link", ""),    unique_articles = []
+
+            created_files.append(filepath)
+
+                        "published": entry.get("published", ""),    for article in articles:
+
+    print()
+
+    print("=" * 60)                    "source": feed.feed.get("title", feed_url),        title_hash = hashlib.md5(article["title"].lower().encode()).hexdigest()[:8]
+
+    print(f"Complete! Created {len(created_files)} new posts.")
+
+    if created_files:                })        if title_hash not in seen_titles:
+
+        print("New files:")
+
+        for f in created_files:        except Exception as e:            seen_titles.add(title_hash)
+
+            print(f"  - {f}")
+
+    print("=" * 60)            print(f"   ⚠️ Failed to fetch {feed_url}: {e}")            unique_articles.append(article)
+
+
+
+        
+
+if __name__ == "__main__":
+
+    main()    # Remove duplicates based on title similarity    return unique_articles[:Config.MAX_ARTICLES_PER_CATEGORY * 2]
+
 
     seen_titles = set()
 
