@@ -1,19 +1,20 @@
 import os
 import json
 import re
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import Optional
 import hashlib
 import time
+import requests
+from datetime import datetime, timezone
+from pathlib import Path
 
 import feedparser
 from slugify import slugify
-import google.generativeai as genai
-
+from google import genai
+from google.genai import types
 
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
-MODEL_NAME = "gemini-1.5-flash"
+NEWSDATA_KEY = os.environ.get("NEWSDATA_KEY", "")
+MODEL_NAME = "gemini-2.0-flash"
 CONTENT_DIR = Path("src/content/blog")
 CATEGORIES = ["tech", "entertainment", "news"]
 
@@ -21,7 +22,6 @@ RSS_FEEDS = {
     "tech": [
         "https://feeds.arstechnica.com/arstechnica/technology-lab",
         "https://www.theverge.com/rss/index.xml",
-        "https://techcrunch.com/feed/",
     ],
     "entertainment": [
         "https://www.polygon.com/rss/index.xml",
@@ -33,19 +33,17 @@ RSS_FEEDS = {
     ],
 }
 
-
 def fetch_news(category):
-    feeds = RSS_FEEDS.get(category, [])
     articles = []
     seen = set()
-    for feed_url in feeds:
+    for feed_url in RSS_FEEDS.get(category, []):
         try:
             feed = feedparser.parse(feed_url)
             for entry in feed.entries[:5]:
-                title_hash = hashlib.md5(entry.title.encode()).hexdigest()
-                if title_hash in seen:
+                h = hashlib.md5(entry.title.encode()).hexdigest()
+                if h in seen:
                     continue
-                seen.add(title_hash)
+                seen.add(h)
                 articles.append({
                     "title": entry.get("title", ""),
                     "summary": entry.get("summary", ""),
@@ -53,56 +51,56 @@ def fetch_news(category):
                     "source": feed.feed.get("title", ""),
                 })
         except Exception as e:
-            print(f"Warning: {e}")
+            print(f"RSS error: {e}")
     return articles[:10]
 
-
-def generate_post(category, articles):
+def generate_article(category, articles):
     if not articles:
         return None
-    genai.configure(api_key=GOOGLE_API_KEY)
-    model = genai.GenerativeModel(MODEL_NAME)
-    articles_text = "\n\n".join([f"**{a['title']}**\n{a['summary']}" for a in articles[:5]])
-    prompt = f"""Write a blog post for FutureScopeHub about {category} news.
+    client = genai.Client(api_key=GOOGLE_API_KEY)
+    news = "\n".join([f"- {a['title']}: {a['summary'][:200]}" for a in articles[:5]])
+    prompt = f"""You are a senior editor for FutureScopeHub. Write a news article about {category}.
 
-News:
-{articles_text}
+NEWS:
+{news}
 
-Return JSON: {{"title": "...", "description": "...", "content": "...", "tags": [...], "tldr": [...]}}"""
+Use Google Search to verify facts. Return JSON only:
+{{"title": "headline", "description": "meta desc", "content": "markdown article 800+ words", "tags": ["t1","t2"], "tldr": ["point1","point2"]}}"""
     try:
-        response = model.generate_content(prompt)
-        text = response.text.strip()
-        if text.startswith("```"):
-            text = re.sub(r"^```json?\n?", "", text)
-            text = re.sub(r"\n?```$", "", text)
-        result = json.loads(text)
+        tool = types.Tool(google_search=types.GoogleSearch())
+        cfg = types.GenerateContentConfig(tools=[tool], temperature=0.7)
+        resp = client.models.generate_content(model=MODEL_NAME, contents=prompt, config=cfg)
+        txt = resp.text.strip()
+        if txt.startswith("```"):
+            txt = re.sub(r"^```json?\n?", "", txt)
+            txt = re.sub(r"\n?```$", "", txt)
+        result = json.loads(txt)
         result["category"] = category
         result["sources"] = [a["link"] for a in articles[:3]]
         return result
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"AI error: {e}")
         return None
 
-
-def write_post(post_data):
-    if not post_data:
+def write_post(data):
+    if not data:
         return None
     CONTENT_DIR.mkdir(parents=True, exist_ok=True)
-    title = post_data.get("title", "Untitled")
+    title = data.get("title", "Untitled")
     slug = slugify(title)[:50]
-    date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    filename = f"{date_str}-{slug}.md"
-    filepath = CONTENT_DIR / filename
-    if filepath.exists():
+    date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    path = CONTENT_DIR / f"{date}-{slug}.md"
+    if path.exists():
         return None
-    tags = "\n".join([f'  - "{t}"' for t in post_data.get("tags", [])])
-    sources = "\n".join([f'  - "{s}"' for s in post_data.get("sources", [])])
-    tldr = "\n".join([f'  - "{p}"' for p in post_data.get("tldr", [])])
-    content = f"""---
+    tags = "\n".join([f'  - "{t}"' for t in data.get("tags", [])])
+    sources = "\n".join([f'  - "{s}"' for s in data.get("sources", [])])
+    tldr = "\n".join([f'  - "{p}"' for p in data.get("tldr", [])])
+    content = data.get("content", "") + "\n\n---\n*AI-assisted report with automated fact-checking.*"
+    md = f"""---
 title: "{title.replace('"', "'")}"
-description: "{post_data.get('description', '').replace('"', "'")}"
+description: "{data.get('description', '').replace('"', "'")}"
 pubDate: {datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
-category: "{post_data.get('category', 'tech')}"
+category: "{data.get('category', 'tech')}"
 tags:
 {tags}
 sources:
@@ -111,28 +109,26 @@ tldr:
 {tldr}
 ---
 
-{post_data.get('content', '')}
+{content}
 """
-    filepath.write_text(content, encoding="utf-8")
-    print(f"Created: {filename}")
-    return filepath
-
+    path.write_text(md, encoding="utf-8")
+    print(f"Created: {path.name}")
+    return path
 
 def main():
-    print("FutureScopeHub Daily Digest")
+    print("FutureScopeHub Autonomous News Agent")
     if not GOOGLE_API_KEY:
-        print("ERROR: GOOGLE_API_KEY not set!")
+        print("ERROR: GOOGLE_API_KEY not set")
         exit(1)
-    for category in CATEGORIES:
-        print(f"Processing {category}...")
-        articles = fetch_news(category)
+    for cat in CATEGORIES:
+        print(f"Processing {cat}...")
+        articles = fetch_news(cat)
         if articles:
-            post = generate_post(category, articles)
+            post = generate_article(cat, articles)
             if post:
                 write_post(post)
-                time.sleep(2)
+                time.sleep(3)
     print("Done!")
-
 
 if __name__ == "__main__":
     main()
